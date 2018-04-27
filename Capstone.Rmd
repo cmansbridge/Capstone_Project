@@ -1,0 +1,29 @@
+---
+title: "CM_Capstone_Football"
+author: "CM"
+date: "April 26, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+# Capstone Project: USMNT success: Is it dependent on Europe?
+The goal of this project is to analyze data about the players from the US Mens National Soccer Team and determine if there is a correlation between the player's club location and/or player's youth development location and a winning outcome.  To analyze this, I will be looking at the statistics from the USMNT games and player pools for the last 5 years.
+
+##Who Cares About This?
+
+The primary user of this data analysis would be football(soccer) fans and youth football players and parents looking to make decisions on location for youth development.
+This project will be useful to determine if more players from outside the standard US youth development and clubs should be chosen and whether MLS is a viable option to further the USMNT.
+
+##What Data Will I Use?
+I will be using data from the US Soccer Federation website.  Some is downloadable and some will need to be sceeen-scraped.
+
+## Approach
+I will gather player clob location and youth development location statistics for the last five years of USMNT player pools. I will overlay that data with the game statistics(win/loss,goals scored,assists) for that time period to determine if the location of the player's club or youth development had any correlation to wins.
+
+##Deliverables
+I will deliver the R code used to analyze the data, the written analysis to accompany and any applicable graphs.

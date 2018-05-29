@@ -1,5 +1,5 @@
 ---
-title: "CM_Capstone_Football"
+title: "CM_Capstone"
 author: "CM"
 date: "April 26, 2018"
 output: html_document
@@ -11,19 +11,19 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 
-# Capstone Project: USMNT success: Is it dependent on Europe?
-The goal of this project is to analyze data about the players from the US Mens National Soccer Team and determine if there is a correlation between the player's club location and/or player's youth development location and a winning outcome.  To analyze this, I will be looking at the statistics from the USMNT games and player pools for the last 5 years.
+# Capstone Project: Average Energy Pricing and Resources -- Effect of Temperature
+The goal of this project is to analyze data from the average day ahead energy prices and energy resources from across the UK.  The average monthly UK temperature from the same time period will also be plotted to see if there is any correlation between temperature, price and resource mix.
 
 ##Who Cares About This?
 
-The primary user of this data analysis would be football(soccer) fans and youth football players and parents looking to make decisions on location for youth development.
-This project will be useful to determine if more players from outside the standard US youth development and clubs should be chosen and whether MLS is a viable option to further the USMNT.
+The primary user of this data analysis would be energy traders and energy facilities managers and investors.
+This project will be useful to see if there is any correlation between energy price, temperature and resource mix.
 
 ## What Data Will I Use?
-I will be using data from the US Soccer Federation website.  Some is downloadable and some will need to be sceeen-scraped.
+I will be using data from the OFGEM and UK government weather website.  All the data is downloadable.
 
 ## Approach
-I will gather player clob location and youth development location statistics for the last five years of USMNT player pools. I will overlay that data with the game statistics(win/loss,goals scored,assists) for that time period to determine if the location of the player's club or youth development had any correlation to wins.
+I will organize the average monthly data into a clean dataframe. I will create graphical analysis of the temperature versus pricing, temperature versus resource mix and price versus resource mix to determine if there is any correlation.
 
 ## Deliverables
 I will deliver the R code used to analyze the data, the written analysis to accompany and any applicable graphs.

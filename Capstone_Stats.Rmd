@@ -1,0 +1,116 @@
+---
+title: "CM_Capstone_Statistics"
+author: "CM"
+date: "August 13, 2018"
+output:
+  html_document: 
+    fig_caption: yes
+  pdf_document: default
+editor_options: 
+  chunk_output_type: console
+---
+
+--- load dataset ---
+```{r Load_Dataset, message=FALSE, warning=FALSE, include=FALSE}
+library(dplyr)
+library(tidyr)
+library(magrittr)
+library(tibble)
+library("ggplot2")
+
+# code to load the 3 distinct datasets into dataframes
+UKenergy <- read.csv("~/Downloads/UKenergy.csv")
+
+#add Period column to UKenergy and update
+UKenergy <- mutate(UKenergy,"Period" = "NA")
+UKenergy$Period <- paste(UKenergy$Quarter,'-',UKenergy$Year)
+UKenergy$Period <- factor(UKenergy$Period, levels = UKenergy$Period)
+UKenergy <- mutate(UKenergy, "MonthYear" = "NA")
+UKenergy$MonthYear <- paste(UKenergy$Month,'-',UKenergy$Year)
+UKenergy$MonthYear <- factor(UKenergy$MonthYear, levels = UKenergy$MonthYear)
+
+#reorg by resource
+UKResGRP <- gather(UKenergy,key = "Resource","Percent",Coal, Oil, Gas,Nuclear, Hydro,Wind,Bio,PumpStorage, Other)
+
+
+#Remove from UKResGRP where earlier than 2016
+UKResGRP<-UKResGRP[!(UKResGRP$Year == 2015),]
+UKResGRP<-UKResGRP[!(UKResGRP$Year == 2018),]
+
+```
+
+## Capstone Statistics:  UK Energy Market DataSets  
+1. *Can you count something interesting?*  
+
+I looked at which energy resource had dominance per quarter.
+What I found was that the resource percentages didn't change drastically from quarter to quarter.  
+This was unexpected. I expected to see larger changes from one quarter to the next.
+
+```{r Question1Plot, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "\\label{fig:figs}Resource Percent by Quarter", fig.align = 'center'}
+ggplot(UKResGRP,aes(x = Period, y = Percent))+
+    geom_point(aes(color = Resource)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+2. *Can you find some trends (high, low, increase, decrease, anomalies)?*
+
+Interestingly, I found that the eight highest prices, six or 75% of them were in the lowest Average Temperature range.  In the United States, many of the highest prices are in the warmer Average Temperature range.  This shows that the UK is less Heat Weather sensitive than the US.
+```{r Question2Plot,echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "\\label{fig:figs}Price by Average Temperature", fig.align = 'center'}
+ggplot(UKResGRP,aes(x = MonthYear, y = Price, color = AvgTemp)) +
+    geom_point() +
+    scale_color_gradient(low = "blue", high = "red") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+3. *Can you make a bar plot or a histogram?*
+
+I plotted the total percent of each resource.
+```{r Question3Plot,echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "\\label{fig:figs}Percentage Resource", fig.align = 'center'}
+
+ggplot(UKResGRP,aes(x=Resource)) +
+  geom_bar(aes(weight = Percent/100))  + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+4. *Can you compare two related quantities?*
+
+I plotted Price versus Average Temperature by Quarter.
+```{r Question4Plot,echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "\\label{fig:figs}Price versus Avg Temp by Quarter", fig.align = 'center'}
+
+#Create new dataset with just 2017 data
+UKResGRP2017<-UKenergy[(UKenergy$Year == 2017),]
+
+ggplot(UKResGRP2017,aes(x=Period,y = AvgTemp,col = Price)) +
+  geom_point()  +
+  scale_color_gradient(low = "green", high = "red") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+5. *Can you make a scatterplot?*
+
+I plotted Average Temp by Price by Month for 2017.
+```{r Question5Plot,echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "\\label{fig:figs}Avg Temp versus Price by Month", fig.align = 'center'}
+
+ggplot(UKResGRP2017,aes(x=MonthYear,y = Price,col = AvgTemp)) +
+  geom_jitter() +
+  scale_color_gradient(low = "green", high = "red") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+6. *Can you make a time-series plot?*
+
+I plotted Resource by Percent by Quarter for 2017.  This shows that certain resources are definitely seasonal, with Coal and Gas being the resources that are more in demand in colder quarters.
+
+```{r Question6Plot,echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "\\label{fig:figs}Resource Percentage by Quarter", fig.align = 'center'}
+
+#Create new dataset with just 2017 data
+UKResGRP2017A<-UKResGRP[(UKResGRP$Year == 2017),]
+
+
+ggplot(UKResGRP2017A,aes(x=Quarter,y = Percent,col = Resource)) +
+  geom_line(size = 1) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+

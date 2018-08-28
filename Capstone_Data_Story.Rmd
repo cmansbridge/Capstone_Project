@@ -1,0 +1,192 @@
+---
+title: "CM_Capstone_Data_Story"
+author: "Cynthia Mansbridge"
+date: "August 28, 2018"
+output:
+  html_document: 
+    fig_caption: yes
+  pdf_document: default
+editor_options: 
+  chunk_output_type: console
+---
+
+<!-- load dataset --> 
+```{r Load_Dataset, message=FALSE, warning=FALSE, include=FALSE}
+library(dplyr)
+library(tidyr)
+library(magrittr)
+library(tibble)
+library("ggplot2")
+
+# code to load the 3 distinct datasets into dataframes
+UKenergy <- read.csv("~/Downloads/UKenergy.csv")
+
+#add Period column to UKenergy and update
+UKenergy <- mutate(UKenergy,"Period" = "NA")
+UKenergy$Period <- paste(UKenergy$Quarter,'-',UKenergy$Year)
+UKenergy$Period <- factor(UKenergy$Period, levels = UKenergy$Period)
+UKenergy <- mutate(UKenergy, "MonthYear" = "NA")
+UKenergy$MonthYear <- paste(UKenergy$Month,'-',UKenergy$Year)
+UKenergy$MonthYear <- factor(UKenergy$MonthYear, levels = UKenergy$MonthYear)
+
+#reorg by resource
+UKResGRP <- gather(UKenergy,key = "Resource","Percent",Coal, Oil, Gas,Nuclear, Hydro,Wind,Bio,PumpStorage, Other)
+
+
+#Remove from UKResGRP where earlier than 2016
+UKResGRP<-UKResGRP[!(UKResGRP$Year == 2015),]
+UKResGRP<-UKResGRP[!(UKResGRP$Year == 2018),]
+
+```
+## UK Energy Pricing, Temperature, and Energy Resources
+
+
+### Introduction
+
+The goal of this project is to analyze data from the average day ahead energy prices and energy resources from across the UK. The average monthly UK temperature from the same time period will also be plotted to see if there is any correlation between temperature, price and resource mix
+
+### Data Sets
+
+The data sets utilized are from the OFGEM and UK government weather websites.  All the data is downloadable.  
+There are three separate data sets that were put together:  Mean UK Temperature, UK Day Ahead Price, and UK Resource Mix.
+
+Data Set 1: **UKprice**  *OFGEM*  UK Monthly Average Day Ahead Energy Prices 1/2015 - 2/2018
+
+Data Set 2: **UKtemp**  *UK National Weather*  UK Mean Temperature 1/2015 - 2/2018
+
+Data Set 3: **UKmix**   *OFGEM*   UK Average Energy Resource Mix 1/2015 - 2/2018
+
+For the Mean UK Temperature [UKtemp], I have collected the Monthly Mean UK Temperature from 2015 - 2018. I filtered out pre-2016 data for my purposes so that the graphing would be more useful.
+
+For the UK Day Ahead Price [UKprice], I have collected the monthly Day Ahead Price information and have filtered it for 2017 forward.  I have overlayed this data with the Mean UK temperature.
+
+For the UK Resource Mix [UKmix], I have the percentages by month and quarter from 2017 forward. 
+
+### Limitations of the Data Sets
+
+Because I don’t have specific geographic data (the temperature is Mean UK temperature), I can’t do more detailed analysis on the effects of temperature on resource mix.  The resource mix and Day Ahead price were also not available at a low enough granularity to do the detailed analysis I might have been able to perform if I had been able to dive into one specific geographic location.
+
+I would have preferred to obtain the cost to run price for the resource mix data set, but it was not available.   This would have provided some further analysis on the temperature sensitivity.   It also would have allowed me to overlay average DA price with the cost to run to predict the percentage resource usage.
+
+### Cleaning and Data Wrangling
+
+Initially, before performing the graphical analysis, I did the following Data Cleansing.
+I looked at all three datasets and determined the best dataset structure to include all three datasets for analysis.
+ 
+I imported each data set separately and made a master dataset from UKtempl
+I added columns from UKprice and UKmix.
+
+The final dataset named UKenergy is as follows:
+
+Field   | Field Type
+------- | -------------
+Month   | Int
+Year    | Int
+Quarter | Int
+Season  | Int
+Price   | Numeric
+AvgTemp | Numeric
+Coal    | Numeric (percent)
+Oil     | Numeric (percent)
+Gas     | Numeric (percent)
+Nuclear | Numeric (percent)
+Hydro   | Numeric (percent)
+Wind    | Numeric (percent)
+Bio     | Numeric (percent)
+PumpStorage | Numeric (percent)
+OtherResource | Numeric (percent)
+ 
+#### Secondary Data Cleansing
+ 
+When I embarked on the graphical analysis, I found that the UKenergy data set was not in the format I needed for all graphs.
+ 
+Therefore,  I had to gather the data for the resource usage percentage into a different data set UKResGrp which is gathered by resource.
+ 
+I also determined that 2018 data needed to be removed leaving only 2017 data.  This allows for a clean graphical display that is easy to analyze.
+
+
+### Preliminary Exploration
+
+
+1. *Can you count something interesting?*  
+
+I looked at which energy resource had dominance per quarter.
+What I found was that the resource percentages didn't change drastically from quarter to quarter.  
+This was unexpected. I expected to see larger changes from one quarter to the next.
+
+```{r Question1Plot, echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "\\label{fig:figs}Resource Percent by Quarter", fig.align = 'center'}
+ggplot(UKResGRP,aes(x = Period, y = Percent))+
+    geom_point(aes(color = Resource)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+2. *Can you find some trends (high, low, increase, decrease, anomalies)?*
+
+Interestingly, I found that the eight highest prices, six or 75% of them were in the lowest Average Temperature range.  In the United States, many of the highest prices are in the warmer Average Temperature range.  This shows that the UK is less Heat Weather sensitive than the US.
+```{r Question2Plot,echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "\\label{fig:figs}Price by Average Temperature", fig.align = 'center'}
+ggplot(UKResGRP,aes(x = MonthYear, y = Price, color = AvgTemp)) +
+    geom_point() +
+    scale_color_gradient(low = "blue", high = "red") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+3. *Can you make a bar plot or a histogram?*
+
+I plotted the total percent of each resource.
+```{r Question3Plot,echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "\\label{fig:figs}Percentage Resource", fig.align = 'center'}
+
+ggplot(UKResGRP,aes(x=Resource)) +
+  geom_bar(aes(weight = Percent/100))  + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+4. *Can you compare two related quantities?*
+
+I plotted Price versus Average Temperature by Quarter.
+```{r Question4Plot,echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "\\label{fig:figs}Price versus Avg Temp by Quarter", fig.align = 'center'}
+
+#Create new dataset with just 2017 data
+UKResGRP2017<-UKenergy[(UKenergy$Year == 2017),]
+
+ggplot(UKResGRP2017,aes(x=Period,y = AvgTemp,col = Price)) +
+  geom_point()  +
+  scale_color_gradient(low = "green", high = "red") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+5. *Can you make a scatterplot?*
+
+I plotted Average Temp by Price by Month for 2017.
+```{r Question5Plot,echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "\\label{fig:figs}Avg Temp versus Price by Month", fig.align = 'center'}
+
+ggplot(UKResGRP2017,aes(x=MonthYear,y = Price,col = AvgTemp)) +
+  geom_jitter() +
+  scale_color_gradient(low = "green", high = "red") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+6. *Can you make a time-series plot?*
+
+I plotted Resource by Percent by Quarter for 2017.  This shows that certain resources are definitely seasonal, with Coal and Gas being the resources that are more in demand in colder quarters.
+
+```{r Question6Plot,echo=FALSE, message=FALSE, warning=FALSE, fig.cap = "\\label{fig:figs}Resource Percentage by Quarter", fig.align = 'center'}
+
+#Create new dataset with just 2017 data
+UKResGRP2017A<-UKResGRP[(UKResGRP$Year == 2017),]
+
+
+ggplot(UKResGRP2017A,aes(x=Quarter,y = Percent,col = Resource)) +
+  geom_line(size = 1) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+ 
+### Next Steps
+
+I will focus on resource mix based on season.
+
+I will also look more deeply at the temperature to price correlation and will apply a standard deviation analysis to it graphically.
+ 
+
